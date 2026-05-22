@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>XProtect Camera Group Optimizer</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="topbar">
+        <div>
+          <p class="eyebrow">Milestone XProtect</p>
+          <h1>Optimizador de grupos de camaras</h1>
+        </div>
+        <button id="logoutButton" class="ghost hidden" type="button">Salir</button>
+      </section>
+
+      <section id="loginPanel" class="login-panel">
+        <form id="loginForm" class="login-form">
+          <label>
+            Servidor de gestion
+            <input id="serverUrl" name="serverUrl" type="text" placeholder="https://xprotect.example.com" required>
+          </label>
+          <label>
+            Usuario
+            <input id="username" name="username" type="text" autocomplete="username" required>
+          </label>
+          <label>
+            Clave
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+          </label>
+          <label class="check-row">
+            <input id="allowSelfSigned" name="allowSelfSigned" type="checkbox">
+            Permitir certificado autofirmado
+          </label>
+          <button type="submit" class="primary">Conectar</button>
+        </form>
+      </section>
+
+      <section id="dashboard" class="dashboard hidden">
+        <div class="metrics">
+          <article>
+            <span id="cameraCount">0</span>
+            <p>Camaras</p>
+          </article>
+          <article>
+            <span id="modelCount">0</span>
+            <p>Modelos</p>
+          </article>
+          <article>
+            <span id="groupCount">0</span>
+            <p>Grupos</p>
+          </article>
+        </div>
+
+        <div class="workspace-grid">
+          <section class="panel">
+            <div class="panel-heading">
+              <h2>Modelos</h2>
+              <input id="modelFilter" type="search" placeholder="Filtrar">
+            </div>
+            <div id="modelList" class="model-list"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <h2>Nuevo grupo</h2>
+              <span id="selectedModelLabel" class="muted">Sin modelo</span>
+            </div>
+            <form id="groupForm" class="group-form">
+              <label>
+                Nombre del grupo
+                <input id="groupName" type="text" required>
+              </label>
+              <div class="selection-row">
+                <span id="selectedCount">0 camaras seleccionadas</span>
+                <button id="selectModelCameras" class="ghost" type="button">Seleccionar modelo</button>
+              </div>
+              <div id="cameraPicker" class="camera-picker"></div>
+              <button id="createGroupButton" class="primary" type="submit" disabled>Crear grupo</button>
+            </form>
+          </section>
+        </div>
+
+        <section class="panel table-panel">
+          <div class="panel-heading">
+            <h2>Camaras</h2>
+            <input id="cameraFilter" type="search" placeholder="Buscar">
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Modelo</th>
+                  <th>Grupos</th>
+                </tr>
+              </thead>
+              <tbody id="cameraTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel groups-panel">
+          <div class="panel-heading">
+            <h2>Grupos existentes</h2>
+            <button id="refreshButton" class="ghost" type="button">Actualizar</button>
+          </div>
+          <div id="groupList" class="group-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <div id="toast" class="toast hidden" role="status"></div>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

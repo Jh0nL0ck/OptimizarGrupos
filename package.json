@@ -1,0 +1,24 @@
+{
+  "name": "xprotect-camera-group-optimizer",
+  "version": "0.1.0",
+  "description": "Web app to group Milestone XProtect cameras by hardware model using the Configuration REST API.",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "check": "node --check src/server.js && node --check src/xprotectClient.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "milestone",
+    "xprotect",
+    "cameras",
+    "configuration-api",
+    "node"
+  ],
+  "author": "",
+  "license": "MIT"
+}
