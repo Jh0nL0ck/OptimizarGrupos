@@ -65,30 +65,22 @@
 
           <section class="panel">
             <div class="panel-heading">
-              <h2>Destino del grupo</h2>
+              <h2>Crear grupo por modelo</h2>
               <span id="selectedModelLabel" class="muted">Sin modelo</span>
             </div>
-            <form id="groupForm" class="group-form">
+            <form id="createGroupForm" class="group-form">
               <label>
-                Grupo destino
-                <select id="targetGroup"></select>
-              </label>
-              <label>
-                Nombre del nuevo grupo
+                Nombre del grupo
                 <input id="groupName" type="text" required>
               </label>
-              <div class="selection-row">
-                <span id="selectedCount">0 camaras seleccionadas</span>
-                <button id="selectVisibleCameras" class="ghost" type="button">Seleccionar visibles</button>
-              </div>
-              <button id="createGroupButton" class="primary" type="submit" disabled>Añadir camaras al grupo</button>
+              <button id="createGroupButton" class="primary" type="submit" disabled>Crear grupo</button>
             </form>
           </section>
         </div>
 
         <section class="panel table-panel">
           <div class="panel-heading">
-            <h2>Camaras</h2>
+            <h2>Camaras habilitadas</h2>
             <input id="cameraFilter" type="search" placeholder="Buscar">
           </div>
           <div class="table-wrap">
@@ -104,6 +96,15 @@
               <tbody id="cameraTable"></tbody>
             </table>
           </div>
+          <form id="assignGroupForm" class="assign-bar">
+            <span id="selectedCount">0 camaras seleccionadas</span>
+            <button id="selectVisibleCameras" class="ghost" type="button">Seleccionar visibles</button>
+            <label>
+              Grupo destino
+              <select id="targetGroup" required></select>
+            </label>
+            <button id="assignGroupButton" class="primary" type="submit" disabled>Anadir camaras al grupo</button>
+          </form>
         </section>
 
         <section class="panel groups-panel">

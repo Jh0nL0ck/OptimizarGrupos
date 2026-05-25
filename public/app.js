@@ -17,12 +17,14 @@ const elements = {
   modelList: document.querySelector("#modelList"),
   modelFilter: document.querySelector("#modelFilter"),
   selectedModelLabel: document.querySelector("#selectedModelLabel"),
-  targetGroup: document.querySelector("#targetGroup"),
+  createGroupForm: document.querySelector("#createGroupForm"),
   groupName: document.querySelector("#groupName"),
+  createGroupButton: document.querySelector("#createGroupButton"),
   selectedCount: document.querySelector("#selectedCount"),
   selectVisibleCameras: document.querySelector("#selectVisibleCameras"),
-  groupForm: document.querySelector("#groupForm"),
-  createGroupButton: document.querySelector("#createGroupButton"),
+  assignGroupForm: document.querySelector("#assignGroupForm"),
+  targetGroup: document.querySelector("#targetGroup"),
+  assignGroupButton: document.querySelector("#assignGroupButton"),
   cameraFilter: document.querySelector("#cameraFilter"),
   cameraTable: document.querySelector("#cameraTable"),
   groupList: document.querySelector("#groupList"),
@@ -74,6 +76,14 @@ function modelCounts() {
   }, new Map());
 }
 
+function visibleCameras() {
+  const filter = elements.cameraFilter.value.trim().toLowerCase();
+  return state.cameras.filter((camera) => {
+    const haystack = `${camera.name} ${camera.model} ${camera.groups.join(" ")}`.toLowerCase();
+    return haystack.includes(filter);
+  });
+}
+
 function renderMetrics() {
   elements.cameraCount.textContent = state.cameras.length;
   elements.modelCount.textContent = state.models.length;
@@ -103,31 +113,21 @@ function renderModels() {
 
 function selectModel(model) {
   state.selectedModel = model;
-  state.selectedCameraIds.clear();
   elements.selectedModelLabel.textContent = model;
   elements.groupName.value = `Modelo - ${model}`.slice(0, 120);
   renderModels();
-  renderCameras();
+  renderCreateGroupState();
 }
 
-function renderSelectionState() {
+function renderCreateGroupState() {
+  elements.createGroupButton.disabled = !state.selectedModel || !elements.groupName.value.trim();
+}
+
+function renderAssignState() {
   const count = state.selectedCameraIds.size;
-  const creatingGroup = elements.targetGroup.value === "__new__";
   elements.selectedCount.textContent = `${count} ${count === 1 ? "camara seleccionada" : "camaras seleccionadas"}`;
-  elements.groupName.disabled = !creatingGroup;
-  elements.selectVisibleCameras.disabled = !state.selectedModel || visibleCameras().length === 0;
-  elements.createGroupButton.disabled = !state.selectedModel || count === 0 || (creatingGroup && !elements.groupName.value.trim());
-}
-
-function visibleCameras() {
-  const filter = elements.cameraFilter.value.trim().toLowerCase();
-  return state.cameras.filter((camera) => {
-    if (state.selectedModel && camera.model !== state.selectedModel) {
-      return false;
-    }
-    const haystack = `${camera.name} ${camera.model} ${camera.groups.join(" ")}`.toLowerCase();
-    return haystack.includes(filter);
-  });
+  elements.selectVisibleCameras.disabled = visibleCameras().length === 0;
+  elements.assignGroupButton.disabled = count === 0 || !elements.targetGroup.value;
 }
 
 function renderCameras() {
@@ -135,8 +135,8 @@ function renderCameras() {
 
   elements.cameraTable.innerHTML = "";
   if (!cameras.length) {
-    elements.cameraTable.innerHTML = '<tr><td colspan="4" class="empty">Selecciona un modelo o cambia el filtro.</td></tr>';
-    renderSelectionState();
+    elements.cameraTable.innerHTML = '<tr><td colspan="4" class="empty">No hay camaras habilitadas para este filtro.</td></tr>';
+    renderAssignState();
     return;
   }
 
@@ -160,7 +160,7 @@ function renderCameras() {
     elements.cameraTable.append(row);
   }
 
-  renderSelectionState();
+  renderAssignState();
 }
 
 function renderGroups() {
@@ -181,10 +181,10 @@ function renderGroups() {
   }
 }
 
-function renderTargetGroups() {
-  const selectedValue = elements.targetGroup.value || "__new__";
+function renderTargetGroups(preferredGroupId = "") {
+  const selectedValue = preferredGroupId || elements.targetGroup.value;
   const customGroups = state.cameraGroups.filter((group) => !group.builtIn);
-  elements.targetGroup.innerHTML = '<option value="__new__">Crear grupo nuevo</option>';
+  elements.targetGroup.innerHTML = "";
 
   for (const group of customGroups) {
     const option = document.createElement("option");
@@ -198,28 +198,28 @@ function renderTargetGroups() {
   }
 }
 
-function renderAll() {
+function renderAll(preferredGroupId = "") {
   renderMetrics();
   renderModels();
-  renderTargetGroups();
+  renderTargetGroups(preferredGroupId);
   renderCameras();
   renderGroups();
+  renderCreateGroupState();
 }
 
-function setInventory(inventory) {
+function setInventory(inventory, preferredGroupId = "") {
   state.cameras = inventory.cameras || [];
   state.cameraGroups = inventory.cameraGroups || [];
   state.models = inventory.models || [];
   if (!state.models.includes(state.selectedModel)) {
     state.selectedModel = "";
-    state.selectedCameraIds.clear();
     elements.groupName.value = "";
     elements.selectedModelLabel.textContent = "Sin modelo";
   }
   state.selectedCameraIds = new Set(
     [...state.selectedCameraIds].filter((cameraId) => state.cameras.some((camera) => camera.id === cameraId))
   );
-  renderAll();
+  renderAll(preferredGroupId);
 }
 
 function showDashboard() {
@@ -253,6 +253,28 @@ elements.loginForm.addEventListener("submit", async (event) => {
   }
 });
 
+elements.createGroupForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  setBusy(elements.createGroupButton, true, "Creando");
+  try {
+    const result = await api("/api/groups", {
+      method: "POST",
+      body: JSON.stringify({
+        name: elements.groupName.value,
+        model: state.selectedModel
+      })
+    });
+    const inventory = await api("/api/inventory");
+    setInventory(inventory, result.groupId);
+    showToast("Grupo creado.");
+  } catch (error) {
+    showToast(error.message, "error");
+  } finally {
+    setBusy(elements.createGroupButton, false);
+    renderCreateGroupState();
+  }
+});
+
 elements.selectVisibleCameras.addEventListener("click", () => {
   for (const camera of visibleCameras()) {
     state.selectedCameraIds.add(camera.id);
@@ -260,22 +282,14 @@ elements.selectVisibleCameras.addEventListener("click", () => {
   renderCameras();
 });
 
-elements.groupName.addEventListener("input", renderSelectionState);
-elements.targetGroup.addEventListener("change", renderSelectionState);
-elements.modelFilter.addEventListener("input", renderModels);
-elements.cameraFilter.addEventListener("input", renderCameras);
-
-elements.groupForm.addEventListener("submit", async (event) => {
+elements.assignGroupForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const groupId = elements.targetGroup.value === "__new__" ? "" : elements.targetGroup.value;
-  setBusy(elements.createGroupButton, true, "Añadiendo");
+  setBusy(elements.assignGroupButton, true, "Anadiendo");
   try {
-    const result = await api("/api/groups", {
+    const result = await api("/api/group-cameras", {
       method: "POST",
       body: JSON.stringify({
-        name: groupId ? "" : elements.groupName.value,
-        groupId,
-        model: state.selectedModel,
+        groupId: elements.targetGroup.value,
         cameraIds: [...state.selectedCameraIds]
       })
     });
@@ -285,18 +299,23 @@ elements.groupForm.addEventListener("submit", async (event) => {
       showToast(`${failed.length} camaras no se pudieron asignar al grupo.`, "error");
     } else {
       state.selectedCameraIds.clear();
-      showToast(result.created ? "Grupo creado y camaras añadidas." : "Camaras añadidas al grupo.");
+      showToast("Camaras anadidas al grupo.");
     }
 
     const inventory = await api("/api/inventory");
-    setInventory(inventory);
+    setInventory(inventory, result.groupId);
   } catch (error) {
     showToast(error.message, "error");
   } finally {
-    setBusy(elements.createGroupButton, false);
-    renderSelectionState();
+    setBusy(elements.assignGroupButton, false);
+    renderAssignState();
   }
 });
+
+elements.groupName.addEventListener("input", renderCreateGroupState);
+elements.targetGroup.addEventListener("change", renderAssignState);
+elements.modelFilter.addEventListener("input", renderModels);
+elements.cameraFilter.addEventListener("input", renderCameras);
 
 elements.refreshButton.addEventListener("click", async () => {
   setBusy(elements.refreshButton, true, "Actualizando");

@@ -118,28 +118,44 @@ async function handleApi(req, res) {
 
       const body = await readJson(req);
       const model = cleanName(body.model);
-      const cameraIds = Array.isArray(body.cameraIds) ? body.cameraIds.filter(Boolean) : [];
       const name = cleanName(body.name || `Model - ${model}`);
+
+      if (!model || !name) {
+        sendJson(res, 400, { error: "Model and group name are required." });
+        return;
+      }
+
+      const result = await client.createCameraGroup({
+        name,
+        description: `Created by XProtect Camera Group Optimizer for model: ${model}`
+      });
+      const groupId = result.id || result.path?.id;
+      if (!groupId) {
+        sendJson(res, 502, { error: "Camera group was created, but XProtect did not return its id." });
+        return;
+      }
+
+      sendJson(res, 201, { groupId, name });
+      return;
+    }
+
+    if (req.method === "POST" && req.url === "/api/group-cameras") {
+      const client = getClient(req);
+      if (!client) {
+        sendJson(res, 401, { error: "Not connected." });
+        return;
+      }
+
+      const body = await readJson(req);
       const groupId = String(body.groupId || "").trim();
+      const cameraIds = Array.isArray(body.cameraIds) ? body.cameraIds.filter(Boolean) : [];
 
-      if (!model || cameraIds.length === 0) {
-        sendJson(res, 400, { error: "Model and at least one camera are required." });
+      if (!groupId || cameraIds.length === 0) {
+        sendJson(res, 400, { error: "Group and at least one camera are required." });
         return;
       }
 
-      if (groupId) {
-        const result = await client.addCamerasToGroup({ groupId, cameraIds });
-        sendJson(res, 200, result);
-        return;
-      }
-
-      if (!name) {
-        sendJson(res, 400, { error: "Group name is required when creating a new group." });
-        return;
-      }
-
-      const result = await client.createGroupWithCameras({ name, model, cameraIds });
-      sendJson(res, 201, { ...result, created: true });
+      sendJson(res, 200, await client.addCamerasToGroup({ groupId, cameraIds }));
       return;
     }
 

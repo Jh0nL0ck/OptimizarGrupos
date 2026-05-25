@@ -273,6 +273,20 @@ button:disabled {
   font-weight: 800;
 }
 
+.assign-bar {
+  display: grid;
+  grid-template-columns: auto auto minmax(260px, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+  margin-top: 14px;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.assign-bar label {
+  min-width: 240px;
+}
+
 .row-check,
 .camera-option input {
   width: 18px;
@@ -366,9 +380,14 @@ td {
 
   .topbar,
   .panel-heading,
-  .selection-row {
+  .selection-row,
+  .assign-bar {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .assign-bar {
+    display: flex;
   }
 
   .panel-heading input {
