@@ -28,7 +28,7 @@ function safeMessage(statusCode, body) {
     return body.slice(0, 300);
   }
 
-  return body.error_description || body.error || body.message || JSON.stringify(body).slice(0, 300);
+  return body.error_description || body.error?.message || body.error || body.message || JSON.stringify(body).slice(0, 800);
 }
 
 function request({ method, url, token, body, form, allowSelfSigned = false }) {
@@ -244,6 +244,7 @@ export class XProtectClient {
 
   async addCameraToGroup(groupId, cameraId) {
     const payloads = [
+      { itemSelection: pathFor("cameras", cameraId) },
       pathFor("cameras", cameraId),
       { path: pathFor("cameras", cameraId) },
       { camera: `cameras/${cameraId}` },
@@ -267,7 +268,9 @@ export class XProtectClient {
     return {
       cameraId,
       ok: false,
-      error: lastError?.message || "Unknown error"
+      error: lastError?.message || "Unknown error",
+      statusCode: lastError?.statusCode || null,
+      body: lastError?.body || null
     };
   }
 

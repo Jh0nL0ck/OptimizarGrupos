@@ -296,7 +296,8 @@ elements.assignGroupForm.addEventListener("submit", async (event) => {
 
     const failed = result.assignments.filter((assignment) => !assignment.ok);
     if (failed.length) {
-      showToast(`${failed.length} camaras no se pudieron asignar al grupo.`, "error");
+      const firstError = failed[0].error ? ` ${failed[0].error}` : "";
+      showToast(`${failed.length} camaras no se pudieron asignar al grupo.${firstError}`, "error");
     } else {
       state.selectedCameraIds.clear();
       showToast("Camaras anadidas al grupo.");
