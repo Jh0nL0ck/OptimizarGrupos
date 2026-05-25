@@ -293,4 +293,16 @@ export class XProtectClient {
       assignments
     };
   }
+
+  async addCamerasToGroup({ groupId, cameraIds }) {
+    const assignments = [];
+    for (const cameraId of cameraIds) {
+      assignments.push(await this.addCameraToGroup(groupId, cameraId));
+    }
+
+    return {
+      groupId,
+      assignments
+    };
+  }
 }

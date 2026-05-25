@@ -120,14 +120,26 @@ async function handleApi(req, res) {
       const model = cleanName(body.model);
       const cameraIds = Array.isArray(body.cameraIds) ? body.cameraIds.filter(Boolean) : [];
       const name = cleanName(body.name || `Model - ${model}`);
+      const groupId = String(body.groupId || "").trim();
 
-      if (!model || !name || cameraIds.length === 0) {
-        sendJson(res, 400, { error: "Model, group name and at least one camera are required." });
+      if (!model || cameraIds.length === 0) {
+        sendJson(res, 400, { error: "Model and at least one camera are required." });
+        return;
+      }
+
+      if (groupId) {
+        const result = await client.addCamerasToGroup({ groupId, cameraIds });
+        sendJson(res, 200, result);
+        return;
+      }
+
+      if (!name) {
+        sendJson(res, 400, { error: "Group name is required when creating a new group." });
         return;
       }
 
       const result = await client.createGroupWithCameras({ name, model, cameraIds });
-      sendJson(res, 201, result);
+      sendJson(res, 201, { ...result, created: true });
       return;
     }
 

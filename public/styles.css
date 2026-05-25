@@ -25,7 +25,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -99,7 +100,8 @@ label {
 
 input[type="text"],
 input[type="password"],
-input[type="search"] {
+input[type="search"],
+select {
   width: 100%;
   min-height: 42px;
   border: 1px solid #c7d0dc;
@@ -109,7 +111,8 @@ input[type="search"] {
   background: #fff;
 }
 
-input:focus {
+input:focus,
+select:focus {
   outline: 3px solid rgba(17, 106, 123, 0.18);
   border-color: var(--accent);
 }
@@ -270,14 +273,20 @@ button:disabled {
   font-weight: 800;
 }
 
-.camera-option {
-  grid-template-columns: auto 1fr auto;
-}
-
+.row-check,
 .camera-option input {
   width: 18px;
   height: 18px;
   accent-color: var(--accent);
+}
+
+tr.selected-row td {
+  background: #eef8fa;
+}
+
+th:first-child,
+td:first-child {
+  width: 112px;
 }
 
 .camera-option small,
