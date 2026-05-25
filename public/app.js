@@ -124,7 +124,7 @@ function renderCameraPicker() {
       label.className = "camera-option";
       label.innerHTML = `
         <input type="checkbox" value="${camera.id}" ${state.selectedCameraIds.has(camera.id) ? "checked" : ""}>
-        <span>${camera.name}<br><small>${camera.address || camera.model}</small></span>
+        <span>${camera.name}<br><small>Modelo: ${camera.model}${camera.address ? ` | ${camera.address}` : ""}</small></span>
         <small>${camera.groups.length ? camera.groups.length : "Sin grupo"}</small>
       `;
       label.querySelector("input").addEventListener("change", (event) => {

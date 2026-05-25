@@ -178,7 +178,7 @@ export class XProtectClient {
 
   async getInventory() {
     const [cameras, hardware, cameraGroups] = await Promise.all([
-      this.getCollection("cameras"),
+      this.getCollection("cameras", { disabled: false }),
       this.getCollection("hardware"),
       this.getCollection("cameraGroups").catch((error) => {
         error.message = `Could not read camera groups: ${error.message}`;
@@ -201,7 +201,9 @@ export class XProtectClient {
       }
     }
 
-    const normalizedCameras = cameras.map((camera) => {
+    const enabledCameras = cameras.filter((camera) => camera.enabled !== false && camera.disabled !== true);
+
+    const normalizedCameras = enabledCameras.map((camera) => {
       const hardwareId = relationId(camera);
       const device = hardwareId ? hardwareById.get(hardwareId.toLowerCase()) : null;
       return {
