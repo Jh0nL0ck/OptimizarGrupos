@@ -2,6 +2,8 @@
 
 Web application for creating and assigning Milestone XProtect camera groups by camera hardware model.
 
+This tool is designed to simplify and speed up camera configuration management. Rather than updating settings individually for each camera, users can organize cameras into groups by model and apply changes at the group level. Any configuration updates made to a group will automatically propagate to all cameras in that group, provided they are the same model.
+
 The tool connects to the XProtect Configuration REST API, reads enabled cameras, detects their hardware models, lists existing camera groups, and helps operators create model-based groups so later configuration changes can be applied consistently at group level.
 
 ## Features
