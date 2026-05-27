@@ -1,6 +1,6 @@
-# XProtect Camera Group Optimizer
+# Camera Group Optimizer
 
-Web application for creating and assigning Milestone XProtect camera groups by camera hardware model.
+Web application for creating and assigning camera groups by camera hardware model when using Milestone XProtect
 
 This tool is designed to simplify and speed up camera configuration management. Rather than updating settings individually for each camera, users can organize cameras into groups by model and apply changes at the group level. Any configuration updates made to a group will automatically propagate to all cameras in that group, provided they are the same model.
 
